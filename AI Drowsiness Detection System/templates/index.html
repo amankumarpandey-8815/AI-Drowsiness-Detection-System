@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Drowsiness AI • Ultra Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --bg:#020617;
+  --bg2:#0f172a;
+  --glass:rgba(255,255,255,0.08);
+  --stroke:rgba(255,255,255,0.12);
+  --accent:#38bdf8;
+  --accent2:#6366f1;
+  --safe:#22c55e;
+  --danger:#ef4444;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Poppins, sans-serif; color:#e5e7eb;
+  background: radial-gradient(1200px 600px at 10% -10%, #1f2937 0%, transparent 60%),
+              radial-gradient(900px 500px at 110% 10%, #1e3a8a 0%, transparent 60%),
+              linear-gradient(135deg,var(--bg),var(--bg2));
+}
+
+/* Navbar */
+.nav{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 24px; backdrop-filter: blur(12px);
+  border-bottom:1px solid var(--stroke);
+}
+.brand{font-weight:600; letter-spacing:.3px}
+.actions{display:flex; gap:12px; align-items:center}
+.icon-btn{
+  border:1px solid var(--stroke); background:var(--glass);
+  padding:8px 10px; border-radius:12px; cursor:pointer;
+}
+
+/* Layout */
+.wrap{max-width:1100px; margin:24px auto; padding:16px}
+.card{
+  background:var(--glass); border:1px solid var(--stroke);
+  border-radius:20px; padding:22px; backdrop-filter: blur(18px);
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  animation:fade .7s ease;
+}
+@keyframes fade{from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:translateY(0)}}
+
+.header{text-align:center}
+.header h2{margin:0 0 6px}
+.header p{margin:0; color:#9ca3af}
+
+.grid{
+  margin-top:18px; display:grid; gap:14px;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+}
+
+/* Floating inputs */
+.field{position:relative}
+.field input{
+  width:100%; padding:16px 12px 10px 42px;
+  border-radius:14px; border:1px solid var(--stroke);
+  background:rgba(255,255,255,0.06); color:#e5e7eb; outline:none;
+}
+.field label{
+  position:absolute; left:42px; top:12px; font-size:12px; color:#9ca3af;
+  pointer-events:none; transition:.2s;
+}
+.field input:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label{
+  top:4px; font-size:10px; color:#93c5fd;
+}
+.icon{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  opacity:.8
+}
+
+/* Button */
+.cta{
+  margin-top:18px; width:100%; padding:16px; border-radius:16px; border:none;
+  background:linear-gradient(45deg,var(--accent),var(--accent2));
+  color:white; font-weight:600; cursor:pointer; transition:.25s;
+}
+.cta:hover{transform:scale(1.04); box-shadow:0 0 28px var(--accent)}
+
+/* Result */
+.result{margin-top:18px; text-align:center}
+.badge{display:inline-block; padding:8px 14px; border-radius:999px; font-weight:600}
+.safeB{background:rgba(34,197,94,.15); color:#86efac}
+.dangerB{background:rgba(239,68,68,.15); color:#fca5a5}
+
+.progress{margin-top:12px; height:10px; background:#111827; border-radius:999px; overflow:hidden}
+.bar{height:100%; width:0; transition:width .6s ease}
+
+/* Loader */
+.loader{display:none; margin-top:14px}
+.spinner{
+  width:34px; height:34px; border-radius:50%;
+  border:3px solid rgba(255,255,255,.2);
+  border-top:3px solid var(--accent);
+  animation:spin 1s linear infinite; margin:auto
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Footer grid */
+.footer-grid{margin-top:22px; display:grid; gap:16px; grid-template-columns:1fr 1fr}
+@media(max-width:700px){.footer-grid{grid-template-columns:1fr}}
+
+canvas{background:rgba(255,255,255,0.04); border-radius:12px; padding:10px}
+
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="brand">🚗 Drowsiness AI</div>
+  <div class="actions">
+    <div class="icon-btn">🌙</div>
+    <div class="icon-btn">👤</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="header">
+      <h2>Driver Health Input Panel</h2>
+      <p>Enter real-time signals to analyze fatigue risk</p>
+    </div>
+
+    <div class="grid">
+      <div class="field"><span class="icon">🎂</span><input placeholder=" " id="age"><label>Age</label></div>
+      <div class="field"><span class="icon">👁️</span><input placeholder=" " id="blink"><label>Blink Rate</label></div>
+      <div class="field"><span class="icon">😴</span><input placeholder=" " id="eye"><label>Eye Closure</label></div>
+      <div class="field"><span class="icon">😮</span><input placeholder=" " id="yawn"><label>Yawning</label></div>
+      <div class="field"><span class="icon">❤️</span><input placeholder=" " id="heart"><label>Heart Rate</label></div>
+      <div class="field"><span class="icon">📐</span><input placeholder=" " id="tilt"><label>Head Tilt</label></div>
+      <div class="field"><span class="icon">🚗</span><input placeholder=" " id="steer"><label>Steering Variation</label></div>
+      <div class="field"><span class="icon">⏱️</span><input placeholder=" " id="reaction"><label>Reaction Time</label></div>
+      <div class="field"><span class="icon">🛌</span><input placeholder=" " id="sleep"><label>Sleep Hours</label></div>
+    </div>
+
+    <button class="cta" onclick="analyze()">🚀 Analyze Driver State</button>
+
+    <div class="loader" id="loader"><div class="spinner"></div></div>
+
+    <div class="result" id="result"></div>
+    <div class="progress"><div id="bar" class="bar"></div></div>
+
+    <div class="footer-grid">
+      <canvas id="chart1"></canvas>
+      <canvas id="chart2"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+function analyze(){
+  document.getElementById('loader').style.display='block';
+  document.getElementById('result').innerHTML='';
+
+  setTimeout(()=>{
+    document.getElementById('loader').style.display='none';
+
+    let prob=Math.random();
+    let status=prob>0.5?"DROWSY ⚠️":"SAFE ✅";
+
+    let badgeClass=prob>0.5?'dangerB':'safeB';
+    document.getElementById('result').innerHTML=
+      `<div class="badge ${badgeClass}">${status}</div><br>${(prob*100).toFixed(2)}% risk`;
+
+    let bar=document.getElementById('bar');
+    bar.style.width=(prob*100)+"%";
+    bar.style.background=prob>0.5?'#ef4444':'#22c55e';
+
+    renderCharts();
+  },1200);
+}
+
+function renderCharts(){
+  new Chart(document.getElementById('chart1'),{
+    type:'line',
+    data:{labels:['Blink','Heart','Reaction'],
+    datasets:[{data:[12,75,30], tension:.4}]}
+  });
+
+
+}
+</script>
+
+</body>
+</html>
